@@ -415,3 +415,52 @@ NodeArray.prototype.siblings = function() {
 	}
 	return temp;
 }
+
+Node.prototype.addClass = function($class) {
+	this.classList.add($class);
+	return this;
+}
+
+NodeArray.prototype.addClass = function($class) {
+	this.forEach(function(v, i) {
+		v.addClass($class);
+	});
+	return this;
+}
+
+Node.prototype.removeClass = function($class) {
+	this.classList.remove($class);
+	return this;
+}
+
+NodeArray.prototype.removeClass = function($class) {
+	this.forEach(function(v, i) {
+		v.removeClass($class);
+	});
+	return this;
+}
+
+Node.prototype.hasClass = function($class) {
+	return this.classList.contains($class);
+}
+
+NodeArray.prototype.hasClass = function($class) {
+	for(var i = 0; i < this.length; i++) {
+		if(this[i].hasClass($class)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+Node.prototype.toggleClass = function($class) {
+	this.classList.toggle($class);
+	return this;
+}
+
+NodeArray.prototype.toggleClass = function($class) {
+	this.forEach(function(v, i) {
+		v.toggle($class);
+	});
+	return this;
+}
