@@ -16,6 +16,7 @@
 + attr修改或获取元素内联属性
 + val修改或获取元素value
 + siblings获取当前元素兄弟元素
++ class操作方法addClass/removeClass/hasClass/toggleClass
 
 ## 注意内容
 + 选择器获取的内容为自定义数组，但是通过eq获取到的是真正的dom节点，和jq的选择器有本质的不同
