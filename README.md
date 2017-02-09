@@ -21,6 +21,6 @@
 ## 注意内容
 + 选择器获取的内容为自定义数组，但是通过eq获取到的是真正的dom节点，和jq的选择器有本质的不同
 + jq获取子级元素为children，但是该选择器获取子级元素为child
-+ on,off目前没有实现事件委托，用法仅限于$().on('event', 'handler')
++ on,off已实现事件委托
 + 提供切片方法，Function.prototype.before,Function.prototype.after，可以在方法执行前后无限制累加运行
 + 重写伪数组concat,forEach,from方法，返回NodeArray伪数组对象，选择器获取的元素伪数组可以直接使用

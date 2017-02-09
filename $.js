@@ -75,69 +75,142 @@ NodeArray.prototype.eq = function(i) {
 }
 
 Node.prototype.on = function(event, handler) {
-	for(var i = 0; i < $event.length; i++) {
-		if($event[i].dom == this) {
-			this.addEventListener(event, handler);
-			if(!$event[i][event]) {
-				$event[i][event] = [];
+	var args = arguments;
+	var _this = this;
+	if(args.length == 2) {
+		var temp = {handler: args[1], bindHandler: args[1], child: null};
+		for(var i = 0; i < $event.length; i++) {
+			if($event[i].dom == _this) {
+				_this.addEventListener(args[0], args[1]);
+				if(!$event[i][args[0]]) {
+					$event[i][args[0]] = [];
+				}
+				$event[i][args[0]].push(temp);
+				return;
 			}
-			$event[i][event].push(handler);
-			return;
 		}
+		_this.addEventListener(args[0], args[1]);
+		$event.push({dom: _this});
+		if(!$event[i][args[0]]) {
+			$event[i][args[0]] = [];
+		}
+		$event[i][args[0]].push(temp);
+	} else if(args.length == 3) {
+		var temp = {handler: args[2], bindHandler: null, child: args[1]};
+		var tempDom = $(_this).find(args[1]);
+		var tempHandler = function(e) {
+			tempDom.forEach(function(v, i) {
+				if(e.target == v) {
+					args[2].call(v, e);
+				}
+			});
+		}
+		temp.bindHandler = tempHandler;
+		for(var i = 0; i < $event.length; i++) {
+			if($event[i].dom == _this) {
+				_this.addEventListener(args[0], tempHandler);
+				if(!$event[i][args[0]]) {
+					$event[i][args[0]] = [];
+				}
+				$event[i][args[0]].push(temp);
+				return;
+			}
+		}
+		this.addEventListener(args[0], tempHandler);
+		$event.push({dom: this});
+		if(!$event[i][args[0]]) {
+			$event[i][args[0]] = [];
+		}
+		$event[i][args[0]].push(temp);
 	}
-	this.addEventListener(event, handler);
-	$event.push({dom: this});
-	if(!$event[i][event]) {
-		$event[i][event] = [];
-	}
-	$event[i][event].push(handler);
 	return;
 }
 
-NodeArray.prototype.on = function(event, handler) {
+NodeArray.prototype.on = function() {
+	var args = arguments;
 	this.forEach(function(v, i) {
-		v.on(event, handler);
+		v.on.apply(v, args);
 	})
 }
 
-Node.prototype.off = function(event, handler) {
+Node.prototype.off = function() {
 	var _this = this;
-	if(!event) {
+	var args = arguments;
+	if(args.length == 0) {
 		for(var i = 0; i < $event.length; i++) {
-			if($event[i].dom == this) {
+			if($event[i].dom == _this) {
 				for(var m in $event[i]) {
 					if($event[i][m] instanceof Array) {
 						$event[i][m].forEach(function(value, index) {
-							_this.removeEventListener(m, value);
+							_this.removeEventListener(m, value.bindHandler);
 						});
 						$event[i][m].length = 0;
 					}
 				}
 			}
 		}
-	} else if(!handler) {
+	} else if(args.length == 1) {
 		for(var i = 0; i < $event.length; i++) {
-			if($event[i].dom == this) {
+			if($event[i].dom == _this) {
 				for(var m in $event[i]) {
-					if(event == m) {
+					if(args[0] == m) {
 						$event[i][m].forEach(function(value, index) {
-							_this.removeEventListener(event, value);
+							_this.removeEventListener(args[0], value.bindHandler);
 						});
 						$event[i][m].length = 0;
 					}
 				}
 			}
 		}
-	} else {
-		for(var i = 0; i < $event.length; i++) {
-			if($event[i].dom == this) {
-				this.removeEventListener(event, handler);
-				if(!$event[i][event]) {
+	} else if(args.length == 2) {
+		if(args[1] instanceof Function) {
+			for(var i = 0; i < $event.length; i++) {
+				if($event[i].dom == _this) {
+					if(!$event[i][args[0]]) {
+						return;
+					}
+					for(var j = 0; j < $event[i][args[0]].length; j++) {
+						if($event[i][args[0]][j].handler == args[1]) {
+							_this.removeEventListener(args[0], $event[i][args[0]][j].bindHandler);
+							$event[i][args[0]].splice(j, 1);
+						}
+					}
 					return;
 				}
-				for(var j = 0; j < $event[i][event].length; j++) {
-					if($event[i][event][j] == handler) {
-						$event[i][event].splice(j, 1);
+			}
+		} else {
+			for(var i = 0; i < $event.length; i++) {
+				if($event[i].dom == _this) {
+					for(var m in $event[i]) {
+						if(args[0] == m) {
+							$event[i][m].forEach(function(value, index) {
+								if(value.child == args[1]) {
+									_this.removeEventListener(args[0], value.bindHandler);
+									delete $event[i][m][index];
+								}
+							});
+							var tempEvent = [];
+							for(var t = 0; t < $event[i][m].length; t++) {
+								if($event[i][m][t] !== undefined) {
+									tempEvent.push($event[i][m][t]);
+								}
+							}
+							$event[i][m] = tempEvent;
+						}
+					}
+				}
+			}
+		}
+	} else if(args.length == 3) {
+		for(var i = 0; i < $event.length; i++) {
+			if($event[i].dom == _this) {
+				if(!$event[i][args[0]]) {
+					return;
+				}
+				for(var j = 0; j < $event[i][args[0]].length; j++) {
+					if($event[i][args[0]][j].handler == args[2] && $event[i][args[0]][j].child == args[1]) {
+						_this.removeEventListener(args[0], $event[i][args[0]][j].bindHandler);
+						$event[i][args[0]].splice(j, 1);
 					}
 				}
 				return;
@@ -146,9 +219,10 @@ Node.prototype.off = function(event, handler) {
 	}
 }
 
-NodeArray.prototype.off = function(event, handler) {
+NodeArray.prototype.off = function() {
+	var args = arguments;
 	this.forEach(function(v, i) {
-		v.off(event, handler);
+		v.off.apply(v, args);
 	})
 }
 
