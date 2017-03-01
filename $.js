@@ -27,6 +27,15 @@ NodeArray.prototype.forEach = function(func) {
 	return Array.prototype.forEach.call(this, func);
 }
 
+NodeArray.prototype.filter = function(func) {
+	var temp = new NodeArray();
+	var tempArray = Array.prototype.filter.call(this, func);
+	tempArray.forEach(function(v, i) {
+		temp.push(v);
+	});
+	return temp;
+}
+
 NodeArray.from = function() {
 	return Array.from.apply(NodeArray, arguments);
 }
@@ -77,10 +86,10 @@ NodeArray.prototype.eq = function(i) {
 Node.prototype.on = function(event, handler) {
 	var args = arguments;
 	var _this = this;
-	if(args.length == 2) {
+	if(args.length === 2) {
 		var temp = {handler: args[1], bindHandler: args[1], child: null};
 		for(var i = 0; i < $event.length; i++) {
-			if($event[i].dom == _this) {
+			if($event[i].dom === _this) {
 				_this.addEventListener(args[0], args[1]);
 				if(!$event[i][args[0]]) {
 					$event[i][args[0]] = [];
@@ -95,19 +104,19 @@ Node.prototype.on = function(event, handler) {
 			$event[i][args[0]] = [];
 		}
 		$event[i][args[0]].push(temp);
-	} else if(args.length == 3) {
+	} else if(args.length === 3) {
 		var temp = {handler: args[2], bindHandler: null, child: args[1]};
 		var tempDom = $(_this).find(args[1]);
 		var tempHandler = function(e) {
 			tempDom.forEach(function(v, i) {
-				if(e.target == v) {
+				if(e.target === v) {
 					args[2].call(v, e);
 				}
 			});
 		}
 		temp.bindHandler = tempHandler;
 		for(var i = 0; i < $event.length; i++) {
-			if($event[i].dom == _this) {
+			if($event[i].dom === _this) {
 				_this.addEventListener(args[0], tempHandler);
 				if(!$event[i][args[0]]) {
 					$event[i][args[0]] = [];
@@ -136,9 +145,9 @@ NodeArray.prototype.on = function() {
 Node.prototype.off = function() {
 	var _this = this;
 	var args = arguments;
-	if(args.length == 0) {
+	if(args.length === 0) {
 		for(var i = 0; i < $event.length; i++) {
-			if($event[i].dom == _this) {
+			if($event[i].dom === _this) {
 				for(var m in $event[i]) {
 					if($event[i][m] instanceof Array) {
 						$event[i][m].forEach(function(value, index) {
@@ -149,11 +158,11 @@ Node.prototype.off = function() {
 				}
 			}
 		}
-	} else if(args.length == 1) {
+	} else if(args.length === 1) {
 		for(var i = 0; i < $event.length; i++) {
-			if($event[i].dom == _this) {
+			if($event[i].dom === _this) {
 				for(var m in $event[i]) {
-					if(args[0] == m) {
+					if(args[0] === m) {
 						$event[i][m].forEach(function(value, index) {
 							_this.removeEventListener(args[0], value.bindHandler);
 						});
@@ -162,15 +171,15 @@ Node.prototype.off = function() {
 				}
 			}
 		}
-	} else if(args.length == 2) {
+	} else if(args.length === 2) {
 		if(args[1] instanceof Function) {
 			for(var i = 0; i < $event.length; i++) {
-				if($event[i].dom == _this) {
+				if($event[i].dom === _this) {
 					if(!$event[i][args[0]]) {
 						return;
 					}
 					for(var j = 0; j < $event[i][args[0]].length; j++) {
-						if($event[i][args[0]][j].handler == args[1]) {
+						if($event[i][args[0]][j].handler === args[1]) {
 							_this.removeEventListener(args[0], $event[i][args[0]][j].bindHandler);
 							$event[i][args[0]].splice(j, 1);
 						}
@@ -180,11 +189,11 @@ Node.prototype.off = function() {
 			}
 		} else {
 			for(var i = 0; i < $event.length; i++) {
-				if($event[i].dom == _this) {
+				if($event[i].dom === _this) {
 					for(var m in $event[i]) {
-						if(args[0] == m) {
+						if(args[0] === m) {
 							$event[i][m].forEach(function(value, index) {
-								if(value.child == args[1]) {
+								if(value.child === args[1]) {
 									_this.removeEventListener(args[0], value.bindHandler);
 									delete $event[i][m][index];
 								}
@@ -201,14 +210,14 @@ Node.prototype.off = function() {
 				}
 			}
 		}
-	} else if(args.length == 3) {
+	} else if(args.length === 3) {
 		for(var i = 0; i < $event.length; i++) {
-			if($event[i].dom == _this) {
+			if($event[i].dom === _this) {
 				if(!$event[i][args[0]]) {
 					return;
 				}
 				for(var j = 0; j < $event[i][args[0]].length; j++) {
-					if($event[i][args[0]][j].handler == args[2] && $event[i][args[0]][j].child == args[1]) {
+					if($event[i][args[0]][j].handler === args[2] && $event[i][args[0]][j].child === args[1]) {
 						_this.removeEventListener(args[0], $event[i][args[0]][j].bindHandler);
 						$event[i][args[0]].splice(j, 1);
 					}
@@ -226,15 +235,34 @@ NodeArray.prototype.off = function() {
 	})
 }
 
-Node.prototype.append = function(dom) {
+Node.prototype.trigger = function(e) {
+	var event = document.createEvent('HTMLEvents');
+	event.initEvent(e, true, false);
+	this.dispatchEvent(event);
+}
+
+NodeArray.prototype.trigger = function(e) {
+	var event = document.createEvent('HTMLEvents');
+	event.initEvent(e, true, false);
+	this.forEach(function(v, i) {
+		v.dispatchEvent(event);
+	})
+}
+
+Node.prototype.appendNode = function(dom) {
+	var _this=  this;
 	if(typeof dom != "object") {
 		this.innerHTML += dom;
+	} else if(dom instanceof NodeArray) {
+		dom.forEach(function(v, i) {
+			_this.appendNode(v);
+		});
 	} else if(dom instanceof Node) {
 		this.appendChild(dom);
 	}
 }
 
-NodeArray.prototype.append = function(dom) {
+NodeArray.prototype.appendNode = function(dom) {
 	this.forEach(function(v, i) {
 		v.append(dom);
 	});
@@ -276,7 +304,7 @@ NodeArray.prototype.parent = function() {
 Node.prototype.parents = function() {
 	var temp = new NodeArray();
 	function findParent(dom) {
-		if(dom == $('body').eq(0)) {
+		if(dom === $('body').eq(0)) {
 			return;
 		}
 		temp.push(dom.parent());
@@ -304,7 +332,7 @@ Node.prototype.child = function() {
 		var temp2 = NodeArray.from(this.find(arguments[0]));
 		for(var i = 0; i < temp1.length; i++) {
 			for(var j = 0; j < temp2.length; j++) {
-				if(temp1[i] == temp2[j]) {
+				if(temp1[i] === temp2[j]) {
 					temp.push(temp1[i]);
 				}
 			}
@@ -368,28 +396,35 @@ NodeArray.prototype.html = function() {
 }
 
 Node.prototype.css = function() {
+	var px = ['top', 'left', 'right', 'bottom', 'marginTop', 'marginRight', 'marginLeft', 'marginBottom', 'paddingLeft', 'paddingRight', 'paddingTop', 'paddingBottom'];
 	if(!arguments.length) {
 		return null;
 	}
+	if(arguments.length === 1) {
+		return this.style[arguments[0]];
+	}
 	if(arguments[0] instanceof Object) {
 		for(var i in arguments[0]) {
-			this.style[i.replace(/-./, function(a) {
+			var _css = i.replace(/-./, function(a) {
 				return a[1].toUpperCase();
-			})] = arguments[0][i];
-//			this.attr('style', this.attr('style') + i.replace(/[A-Z]/, function($1) {
-//				return $1.toLowerCase();
-//			}) + ':' + arguments[0][i]);
+			});
+			if(~px.indexOf(_css) && !~(arguments[0][i].toString().indexOf('px'))) {
+				this.style[_css] = arguments[0][i] + 'px';
+			} else {
+				this.style[_css] = arguments[0][i];
+			}
 		}
-		return this;
 	} else {
-		this.style[arguments[0].replace(/-./, function(a) {
+		var _css = arguments[0].replace(/-./, function(a) {
 			return a[1].toUpperCase();
-		})] = arguments[1];
-//		this.attr('style', this.attr('style') + arguments[0].replace(/[A-Z]/, function($1) {
-//			return $1.toLowerCase();
-//		}) + ':' + arguments[1]);
-//		return this;
+		})
+		if(~px.indexOf(_css) && !~(arguments[1].toString().indexOf('px'))) {
+			this.style[_css] = arguments[1] + 'px';
+		} else {
+			this.style[_css] = arguments[1];
+		}
 	}
+	return this;
 }
 
 NodeArray.prototype.css = function() {
@@ -397,29 +432,16 @@ NodeArray.prototype.css = function() {
 		return this;
 	}
 	var args = arguments;
-	if(args[0] instanceof Object) {
-		for(var i in args[0]) {
-			this.forEach(function(v, i) {
-				v.style[i.replace(/-./, function(a) {
-					return a[1].toUpperCase();
-				})] = args[0][i];
-			});
-			return this;
-		}
-	} else {
-		this.forEach(function(v, i) {
-			v.style[args[0].replace(/-./, function(a) {
-				return a[1].toUpperCase();
-			})] = args[1];
-		});
-		return this;
-	}
+	this.forEach(function(v, i) {
+		v.css.apply(v, args);
+	});
+	return this;
 }
 
 Node.prototype.attr = function() {
 	if(!arguments.length) {
 		return null;
-	} else if(arguments.length == 1) {
+	} else if(arguments.length === 1) {
 		return this.getAttribute(arguments[0]);
 	} else {
 		this.setAttribute(arguments[0], arguments[1]);
@@ -430,7 +452,7 @@ Node.prototype.attr = function() {
 NodeArray.prototype.attr = function() {
 	if(!arguments.length) {
 		return null;
-	} else if(arguments.length == 1) {
+	} else if(arguments.length === 1) {
 		return this.eq(0).getAttribute(arguments[0]);
 	} else {
 		var args = arguments;
@@ -537,4 +559,143 @@ NodeArray.prototype.toggleClass = function($class) {
 		v.toggle($class);
 	});
 	return this;
+}
+
+Node.prototype.offset = function() {
+	return this.getBoundingClientRect();
+}
+
+NodeArray.prototype.offset = function() {
+	return this.eq(0).getBoundingClientRect();
+}
+
+Node.prototype.position = function() {
+	return {left: this.offsetLeft, top: this.offsetTop};
+}
+
+NodeArray.prototype.position = function() {
+	return this.eq(0).position();
+}
+
+Node.prototype.after = function(text) {
+	this.insertAdjacentHTML('afterend', text);
+	return this;
+}
+
+NodeArray.prototype.after = function(text) {
+	this.forEach(function(v, i) {
+		v.after(text);
+	});
+	return this;
+}
+
+Node.prototype.before = function(text) {
+	this.insertAdjacentHTML('beforebegin', text);
+	return this;
+}
+
+NodeArray.prototype.before = function(text) {
+	this.forEach(function(v, i) {
+		v.before(text);
+	});
+	return this;
+}
+
+Node.prototype.clone = function() {
+	return this.cloneNode(true);
+}
+
+NodeArray.prototype.clone = function() {
+	var temp = new NodeArray();
+	this.forEach(function(v, i) {
+		temp.push(v.clone());
+	});
+	return temp;
+}
+
+Node.prototype.empty = function() {
+	this.innerHTML = '';
+	return this;
+}
+
+NodeArray.prototype.empty = function() {
+	var temp = new NodeArray();
+	this.forEach(function(v, i) {
+		temp.push(v.empty());
+	});
+	return temp;
+}
+
+Node.prototype.text = function() {
+	if(!arguments.length) {
+		return this.textContent;
+	} else {
+		this.textContent = arguments[0];
+		return this;
+	}
+}
+
+NodeArray.prototype.text = function() {
+	if(!this.length) {
+		if(!arguments.length) {
+			return undefined;
+		} else {
+			return new NodeArray();
+		}
+	}
+	if(!arguments.length) {
+		return this.eq(0).textContent;
+	} else {
+		var args = arguments;
+		this.forEach(function(v, i) {
+			v.textContent = args[0];
+		})
+		return this;
+	}
+}
+
+Node.prototype.next = function() {
+	return this.nextElementSibling;
+}
+
+NodeArray.prototype.next = function() {
+	var temp = new NodeArray();
+	this.forEach(function(v, i) {
+		var tp = v.next();
+		if(tp) {
+			temp.push(tp);
+		}
+	});
+	return temp;
+}
+
+Node.prototype.prev = function() {
+	return this.previousElementSibling;
+}
+
+NodeArray.prototype.prev = function() {
+	var temp = new NodeArray();
+	this.forEach(function(v, i) {
+		var tp = v.prev();
+		if(tp) {
+			temp.push(tp);
+		}
+	});
+	return temp;
+}
+
+Node.prototype.remove = function() {
+	var args = arguments;
+	if(args.length === 0) {
+		this.parent().removeChild(this);
+	}
+}
+
+NodeArray.prototype.remove = function() {
+	var args = arguments;
+	if(args.length === 0) {
+		this.forEach(function(v, i) {
+			v.remove();
+		})
+	}
 }
