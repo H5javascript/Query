@@ -14,7 +14,7 @@
 + html修改或获取元素内容
 + text修改或获取元素文本内容
 + css修改或获取元素内联样式
-+ attr修改或获取元素内联属性
++ attr修改或获取元素内联属性，removeAttr删除内联属性
 + val修改或获取元素value
 + siblings获取当前元素兄弟元素
 + class操作方法addClass/removeClass/hasClass/toggleClass

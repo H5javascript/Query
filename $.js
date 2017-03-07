@@ -252,7 +252,7 @@ NodeArray.prototype.trigger = function(e) {
 Node.prototype.appendNode = function(dom) {
 	var _this=  this;
 	if(typeof dom != "object") {
-		this.innerHTML += dom;
+		this.html(this.html() + dom);
 	} else if(dom instanceof NodeArray) {
 		dom.forEach(function(v, i) {
 			_this.appendNode(v);
@@ -264,7 +264,7 @@ Node.prototype.appendNode = function(dom) {
 
 NodeArray.prototype.appendNode = function(dom) {
 	this.forEach(function(v, i) {
-		v.append(dom);
+		v.appendNode(dom);
 	});
 }
 
@@ -461,6 +461,17 @@ NodeArray.prototype.attr = function() {
 		});
 		return this;
 	}
+}
+
+Node.prototype.removeAttr = function() {
+	this.removeAttribute(arguments[0]);
+}
+
+NodeArray.prototype.removeAttr = function() {
+	var args = arguments;
+	this.forEach(function(v, i) {
+		v.removeAttr(args[0]);
+	});
 }
 
 Node.prototype.val = function() {
