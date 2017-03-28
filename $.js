@@ -106,8 +106,8 @@ Node.prototype.on = function(event, handler) {
 		$event[i][args[0]].push(temp);
 	} else if(args.length === 3) {
 		var temp = {handler: args[2], bindHandler: null, child: args[1]};
-		var tempDom = $(_this).find(args[1]);
 		var tempHandler = function(e) {
+			var tempDom = $(_this).find(args[1]);
 			tempDom.forEach(function(v, i) {
 				if(e.target === v || ~v.find('*').indexOf(e.target)) {
 					args[2].call(v, e);
