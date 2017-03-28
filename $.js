@@ -695,19 +695,27 @@ NodeArray.prototype.prev = function() {
 	return temp;
 }
 
-Node.prototype.remove = function() {
+Node.prototype.removeNode = function() {
 	var args = arguments;
 	if(args.length === 0) {
-		this.parent().removeChild(this);
+//		this.parent().removeChild(this);
+		this.remove();
+	} else {
+//		this.removeChild(this.find(args[0]).eq(0));
+		this.find(args[0]).eq(0).remove();
 	}
 }
 
-NodeArray.prototype.remove = function() {
+NodeArray.prototype.removeNode = function() {
 	var args = arguments;
 	if(args.length === 0) {
 		this.forEach(function(v, i) {
-			v.remove();
-		})
+			v.removeNode();
+		});
+	} else {
+		this.forEach(function(v, i) {
+			v.removeNode(args[0]);
+		});
 	}
 }
 

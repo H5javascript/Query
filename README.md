@@ -24,7 +24,7 @@
 + empty方法置空元素
 + clone方法复制元素
 + next、prev获取相邻元素
-+ remove移除当前元素
++ removeNode移除当前元素或子元素
 
 ## 注意内容
 + 选择器获取的内容为自定义数组，但是通过eq获取到的是真正的dom节点，和jq的选择器有本质的不同
@@ -34,3 +34,4 @@
 + 重写伪数组concat,forEach,from方法，返回NodeArray伪数组对象，选择器获取的元素伪数组可以直接使用
 + filter方法只能传function进行过滤，未实现传字符串进行过滤
 + append因为存在原生方法，所以添加子元素方法为appendNode
++ remove因为存在原生方法，所以添加子元素方法为removeNode
