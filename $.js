@@ -5,6 +5,7 @@ function NodeArray() {
 };
 
 NodeArray.prototype = Object.create(Array.prototype);
+NodeArray.prototype.constructor = NodeArray;
 
 NodeArray.prototype.concat = function() {
 	var temp = new NodeArray();
@@ -396,7 +397,7 @@ NodeArray.prototype.html = function() {
 }
 
 Node.prototype.css = function() {
-	var px = ['top', 'left', 'right', 'bottom', 'marginTop', 'marginRight', 'marginLeft', 'marginBottom', 'paddingLeft', 'paddingRight', 'paddingTop', 'paddingBottom'];
+	var px = ['top', 'left', 'right', 'bottom', 'marginTop', 'marginRight', 'marginLeft', 'marginBottom', 'paddingLeft', 'paddingRight', 'paddingTop', 'paddingBottom', 'width', 'height'];
 	if(!arguments.length) {
 		return null;
 	}
@@ -698,10 +699,8 @@ NodeArray.prototype.prev = function() {
 Node.prototype.removeNode = function() {
 	var args = arguments;
 	if(args.length === 0) {
-//		this.parent().removeChild(this);
 		this.remove();
 	} else {
-//		this.removeChild(this.find(args[0]).eq(0));
 		this.find(args[0]).eq(0).remove();
 	}
 }
@@ -716,6 +715,64 @@ NodeArray.prototype.removeNode = function() {
 		this.forEach(function(v, i) {
 			v.removeNode(args[0]);
 		});
+	}
+}
+
+Node.prototype.height = function() {
+	if(!arguments.length) {
+		var styles = getComputedStyle(this);
+		var height = this.offsetHeight;
+		var borderTopWidth = parseFloat(styles.borderTopWidth);
+		var borderBottomWidth = parseFloat(styles.borderBottomWidth);
+		var paddingTop = parseFloat(styles.paddingTop);
+		var paddingBottom = parseFloat(styles.paddingBottom);
+		return height - borderBottomWidth - borderTopWidth - paddingTop - paddingBottom;
+	} else {
+		this.css('height', arguments[0]);
+	}
+}
+
+NodeArray.prototype.height = function() {
+	if(!this.length) {
+		return null;
+	}
+	if(!arguments.length) {
+		return this.eq(0).height();
+	} else {
+		var args = arguments;
+		this.forEach(function(v, i) {
+			v.height(args[0]);
+		});
+		return this;
+	}
+}
+
+Node.prototype.width = function() {
+	if(!arguments.length) {
+		var styles = getComputedStyle(this);
+		var width = this.offsetWidth;
+		var borderLeftWidth = parseFloat(styles.borderLeftWidth);
+		var borderRightWidth = parseFloat(styles.borderRightWidth);
+		var paddingLeft = parseFloat(styles.paddingLeft);
+		var paddingRight = parseFloat(styles.paddingRight);
+		return width - borderLeftWidth - borderRightWidth - paddingLeft - paddingRight;
+	} else {
+		this.css('width', arguments[0]);
+	}
+}
+
+NodeArray.prototype.width = function() {
+	if(!this.length) {
+		return null;
+	}
+	if(!arguments.length) {
+		return this.eq(0).width();
+	} else {
+		var args = arguments;
+		this.forEach(function(v, i) {
+			v.width(args[0]);
+		});
+		return this;
 	}
 }
 
